@@ -1,0 +1,30 @@
+name: MahjongABC
+options:
+  bundleIdPrefix: com.aistudio.mahjongabc
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    PRODUCT_BUNDLE_IDENTIFIER: com.aistudio.mahjongabc.ios
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  MahjongABC:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Mahjong ABC
+        CFBundleName: MahjongABC
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight

@@ -1,0 +1,54 @@
+name: Build iOS IPA
+
+on:
+  push:
+    paths:
+      - 'ios-app/**'
+      - '.github/workflows/build-ios-ipa.yml'
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+
+      - name: Generate Xcode project
+        working-directory: ios-app
+        run: xcodegen generate
+
+      - name: Build unsigned iOS app
+        working-directory: ios-app
+        run: |
+          xcodebuild \
+            -project MahjongABC.xcodeproj \
+            -scheme MahjongABC \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package Mahjong-ABC.ipa
+        working-directory: ios-app
+        run: |
+          mkdir -p ipa_out/Payload
+          cp -R build/Build/Products/Release-iphoneos/MahjongABC.app ipa_out/Payload/
+          cd ipa_out
+          zip -r ../Mahjong-ABC.ipa Payload
+
+      - name: Upload Mahjong-ABC.ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mahjong-ABC-iOS-IPA
+          path: ios-app/Mahjong-ABC.ipa
