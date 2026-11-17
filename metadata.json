@@ -1,0 +1,6 @@
+{
+  "name": "Mahjong ABC",
+  "description": "Jeu de Mahjong éducatif pour enfants : lettres A-Z, chiffres 0-10 et lettres arabes أ-ي avec prononciation audio et niveaux infinis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

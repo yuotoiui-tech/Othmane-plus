@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Mahjong ABC</string>
+    <string name="home_subtitle">Apprends les lettres et les chiffres en jouant</string>
+    <string name="mode_levels_title">Niveaux Infinis</string>
+    <string name="mode_levels_subtitle">Progression infinie • Facile, Moyen, Difficile</string>
+    <string name="mode_endless_title">Mode Sans Fin</string>
+    <string name="mode_endless_subtitle">Plateaux aléatoires à l\'infini</string>
+    <string name="difficulty_easy">Facile • سهل</string>
+    <string name="difficulty_medium">Moyen • متوسط</string>
+    <string name="difficulty_hard">Difficile • صعب</string>
+    <string name="pack_all">Tout (A-Z, 0-10, أ-ي)</string>
+    <string name="pack_latin">Lettres A – Z</string>
+    <string name="pack_numbers">Chiffres 0 – 10</string>
+    <string name="pack_arabic">الحروف أ – ي</string>
+    <string name="hud_score">Score</string>
+    <string name="hud_pairs">Paires</string>
+    <string name="hud_level">Niveau</string>
+    <string name="hud_endless">Sans fin</string>
+    <string name="action_back">Retour</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="action_shuffle">Mélanger</string>
+    <string name="action_hint">Indice</string>
+    <string name="action_repeat_sound">Répéter le son</string>
+    <string name="settings_title">Paramètres • الإعدادات</string>
+    <string name="settings_music">Musique calme (Instrumentale)</string>
+    <string name="settings_sfx">Effets sonores des tuiles</string>
+    <string name="settings_voice">Voix (Prononciation)</string>
+    <string name="settings_speak_on_tap">Prononcer aussi au toucher</string>
+    <string name="settings_arabic_voice">Langue des lettres arabes</string>
+    <string name="settings_show_hint_badge">Afficher les tuiles libres</string>
+    <string name="level_complete_title">Bravo !</string>
+    <string name="next_level">Niveau suivant</string>
+    <string name="replay_level">Rejouer</string>
+    <string name="back_home">Accueil</string>
+</resources>

@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mahjong ABC" />
+  <meta name="theme-color" content="#0A5F42" />
+  <title>Mahjong ABC — iPhone &amp; iPad</title>
+  <style>
+    :root {
+      --bg-center: #137052;
+      --bg-mid: #0C543D;
+      --bg-edge: #053324;
+      --card: rgba(14, 71, 53, 0.94);
+      --border: #2B8C6B;
+      --gold: #FFCA3A;
+      --mint: #56E39F;
+      --wood-light: #D97736;
+      --wood-dark: #8F3E14;
+      --wood-rim: #F5B763;
+      --ivory-top: #FFFDF7;
+      --ivory-bot: #F3EAD8;
+      --rim-green: #43A038;
+      --rim-green-dark: #286E22;
+      --text: #FFFBF0;
+      --text-dim: #B9DFCE;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: manipulation;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Nunito", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 50% 40%, var(--bg-center), var(--bg-mid) 58%, var(--bg-edge) 100%);
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top, 12px);
+      padding-bottom: env(safe-area-inset-bottom, 12px);
+      padding-left: env(safe-area-inset-left, 12px);
+      padding-right: env(safe-area-inset-right, 12px);
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      padding: 10px 14px 18px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .top-row {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wood-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--wood-rim);
+      background: linear-gradient(180deg, var(--wood-light), var(--wood-dark));
+      color: var(--gold);
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+    }
+
+    .pill-stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--gold);
+    }
+
+    .hero-tiles {
+      display: flex;
+      align-items: center;
+      margin: 14px 0 8px;
+    }
+
+    .mini-tile {
+      width: 46px;
+      height: 56px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, var(--ivory-top), var(--ivory-bot));
+      box-shadow: 3px 4px 0 var(--rim-green-dark), 0 6px 12px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      margin: 0 -3px;
+    }
+
+    h1 {
+      margin: 4px 0 2px;
+      font-size: 32px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .section-label {
+      width: 100%;
+      max-width: 560px;
+      color: var(--mint);
+      font-size: 13px;
+      font-weight: 800;
+      margin: 6px 0 8px;
+    }
+
+    .chips {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text-dim);
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .chip.selected {
+      background: var(--gold);
+      color: var(--bg-edge);
+      border-color: var(--gold);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      padding: 16px;
+      margin-top: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin: 2px 0 0;
+    }
+
+    .diff-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .diff-btn {
+      flex: 1;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(5, 51, 36, 0.65);
+      color: var(--text);
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .diff-btn.selected {
+      background: var(--wood-light);
+      border: 2px solid var(--gold);
+    }
+
+    .diff-btn small {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .diff-btn.selected small {
+      color: var(--gold);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      height: 50px;
+      border: none;
+      border-radius: 15px;
+      background: var(--gold);
+      color: var(--bg-edge);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-wood {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 15px;
+      background: var(--wood-light);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-outline {
+      height: 50px;
+      padding: 0 16px;
+      border-radius: 15px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Game Board */
+    #game-screen {
+      overflow: hidden;
+      justify-content: space-between;
+    }
+
+    .hud-stats {
+      display: flex;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .hud-stats .lbl {
+      font-size: 12px;
+      font-weight: 800;
+      color: #4BE39E;
+    }
+
+    .hud-stats .val {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .sub-hud {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .pronounce-pill {
+      background: var(--gold);
+      color: var(--bg-edge);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .board-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 8px 0;
+    }
+
+    .board {
+      position: relative;
+    }
+
+    .tile {
+      position: absolute;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.14s ease;
+    }
+
+    .tile-depth {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, var(--rim-green), var(--rim-green-dark));
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.36);
+    }
+
+    .tile-face {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, var(--ivory-top), var(--ivory-bot));
+      border: 1.5px solid #E3D8C5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+
+    .tile.selected {
+      transform: translateY(-4px) scale(1.06);
+    }
+
+    .tile.selected .tile-face {
+      border: 3px solid #FFB300;
+    }
+
+    .tile.hinted .tile-face {
+      border: 3px solid #29D3FF;
+    }
+
+    .tile.blocked .tile-face::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(18, 56, 42, 0.36);
+    }
+
+    .tile.shake {
+      animation: shake 0.28s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .bottom-hud {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      padding-bottom: 4px;
+    }
+
+    .diamond-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .diamond-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 2px solid var(--wood-rim);
+      background: linear-gradient(180deg, var(--wood-light), var(--wood-dark));
+      transform: rotate(45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .diamond-btn span {
+      transform: rotate(-45deg);
+      font-size: 20px;
+      color: var(--gold);
+      font-weight: 800;
+    }
+
+    .diamond-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--card);
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 22px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(43, 140, 107, 0.4);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .levels-grid {
+      width: 100%;
+      max-width: 560px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .lvl-node {
+      aspect-ratio: 1;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text-dim);
+      font-size: 20px;
+      font-weight: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lvl-node.current {
+      background: var(--gold);
+      color: var(--bg-edge);
+      border-color: var(--text);
+    }
+
+    .lvl-node.done {
+      background: var(--ivory-top);
+      color: var(--bg-edge);
+      border-color: var(--rim-green-dark);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- HOME SCREEN -->
+    <div id="home-screen" class="screen active">
+      <div class="top-row">
+        <div class="pill-stat" id="total-score-pill">★ 0 pts</div>
+        <div style="display:flex; gap:8px;">
+          <button class="wood-circle" id="home-music-btn" aria-label="Musique">♪</button>
+          <button class="wood-circle" id="home-settings-btn" aria-label="Paramètres">⚙</button>
+        </div>
+      </div>
+
+      <div class="hero-tiles">
+        <div class="mini-tile" style="color:#D63638; transform:rotate(-8deg);">A</div>
+        <div class="mini-tile" style="color:#1958C9; margin-bottom:10px;">1</div>
+        <div class="mini-tile" style="color:#B55309; transform:rotate(8deg);">أ</div>
+      </div>
+
+      <h1>Mahjong ABC</h1>
+      <p class="subtitle">Apprends les lettres A–Z, chiffres 0–10 et الحروف أ–ي en jouant</p>
+
+      <div class="section-label">Contenu des tuiles</div>
+      <div class="chips" id="pack-chips"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Niveaux Infinis</h2>
+            <p class="card-sub">Progression infinie • Facile, Moyen, Difficile</p>
+          </div>
+          <div class="pill-stat" id="unlocked-badge">Niv. 1 / ∞</div>
+        </div>
+        <div class="diff-row" id="diff-row"></div>
+        <div class="btn-row">
+          <button class="btn-primary" id="play-campaign-btn">▶ Niveau 1</button>
+          <button class="btn-outline" id="open-levels-btn">Niveaux</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">∞ Mode Sans Fin</h2>
+            <p class="card-sub">Niveaux générés aléatoirement à l'infini</p>
+          </div>
+          <div class="pill-stat" id="streak-badge" style="color:var(--mint);">Série : 0</div>
+        </div>
+        <button class="btn-wood" id="play-endless-btn">∞ Jouer Sans Fin</button>
+      </div>
+    </div>
+
+    <!-- LEVEL MAP SCREEN -->
+    <div id="levels-screen" class="screen">
+      <div class="top-row">
+        <button class="wood-circle" id="levels-back-btn">←</button>
+        <div style="text-align:center;">
+          <div style="font-weight:900; font-size:18px;">Niveaux Infinis</div>
+          <div id="levels-sub" style="font-size:12px; color:var(--mint);">∞ Niveaux</div>
+        </div>
+        <button class="wood-circle" id="levels-settings-btn">⚙</button>
+      </div>
+      <div class="diff-row" id="map-diff-row" style="width:100%; max-width:560px; margin-top:12px;"></div>
+      <div class="levels-grid" id="levels-grid"></div>
+      <button class="btn-outline" id="load-more-levels-btn" style="margin-top:14px;">+ Charger plus de niveaux</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+      <div class="top-row">
+        <button class="wood-circle" id="game-back-btn">←</button>
+        <div class="hud-stats">
+          <div>
+            <div class="lbl">Score</div>
+            <div class="val" id="hud-score">0</div>
+          </div>
+          <div>
+            <div class="lbl">Paires</div>
+            <div class="val" id="hud-pairs">0</div>
+          </div>
+        </div>
+        <button class="wood-circle" id="game-settings-btn">⚙</button>
+      </div>
+
+      <div class="sub-hud">
+        <div class="pill-stat" id="mode-pill" style="color:var(--text);">Facile • Niveau 1</div>
+        <button class="pronounce-pill" id="pronounce-pill" style="display:none;">🔊</button>
+      </div>
+
+      <div class="board-wrap" id="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="bottom-hud">
+        <div class="diamond-wrap" id="shuffle-btn">
+          <div class="diamond-btn"><span>⇄</span></div>
+          <div class="diamond-lbl">Mélanger</div>
+        </div>
+        <div class="pill-stat" id="tiles-left-pill" style="color:var(--text-dim);">0 tuiles</div>
+        <div class="diamond-wrap" id="hint-btn">
+          <div class="diamond-btn"><span>💡</span></div>
+          <div class="diamond-lbl">Indice</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div id="settings-screen" class="screen">
+      <div class="top-row">
+        <button class="wood-circle" id="settings-back-btn">←</button>
+        <div style="font-weight:900; font-size:18px;">Paramètres • الإعدادات</div>
+        <div style="width:48px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="setting-row">
+          <span>Musique calme (Instrumentale)</span>
+          <input type="checkbox" id="opt-music" checked />
+        </div>
+        <div class="setting-row">
+          <span>Effets sonores des tuiles</span>
+          <input type="checkbox" id="opt-sfx" checked />
+        </div>
+        <div class="setting-row">
+          <span>Voix (Prononciation)</span>
+          <input type="checkbox" id="opt-voice" checked />
+        </div>
+        <div class="setting-row">
+          <span>Prononcer dès le 1er toucher</span>
+          <input type="checkbox" id="opt-speak-tap" checked />
+        </div>
+        <div class="setting-row" style="border-bottom:none;">
+          <span>Assombrir les tuiles bloquées</span>
+          <input type="checkbox" id="opt-dim-blocked" checked />
+        </div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn-primary" id="test-fr-btn">🔊 Tester (1 • Un)</button>
+          <button class="btn-primary" id="test-ar-btn" style="background:var(--mint);">🔊 Tester (أ • ألف)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="color:var(--mint); font-weight:800; margin-bottom:8px;">Langue des lettres arabes</div>
+        <div id="ar-mode-radios" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETE MODAL -->
+  <div class="modal-backdrop" id="complete-modal">
+    <div class="modal-card">
+      <div style="font-size:32px; color:var(--gold);">★★★</div>
+      <h2 style="margin:0; font-size:26px; color:var(--gold);">Bravo ! • أحسنت !</h2>
+      <div id="complete-sub" style="font-weight:700;"></div>
+      <div class="pill-stat" id="complete-score">Score : 0</div>
+      <button class="btn-primary" id="next-board-btn">▶ Niveau suivant</button>
+      <div class="btn-row">
+        <button class="btn-outline" id="replay-btn" style="flex:1;">Rejouer</button>
+        <button class="btn-outline" id="complete-home-btn" style="flex:1; border-color:var(--wood-light);">Accueil</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- SYMBOLS CATALOG ---
+    const LATIN_SPEECH = {
+      A:"a", B:"bé", C:"cé", D:"dé", E:"e", F:"effe", G:"gé", H:"hache", I:"i",
+      J:"ji", K:"ka", L:"elle", M:"emme", N:"enne", O:"o", P:"pé", Q:"ku", R:"erre",
+      S:"esse", T:"té", U:"u", V:"vé", W:"double vé", X:"ixe", Y:"i grec", Z:"zède"
+    };
+    const NUM_FR = ["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix"];
+    const ARABIC_SPECS = [
+      ["alif","أ","حَرْفُ الأَلِف","ألف","Alif","Alif"],
+      ["ba","ب","حَرْفُ البَاء","باء","Bâ","Ba"],
+      ["ta","ت","حَرْفُ التَّاء","تاء","Tâ","Ta"],
+      ["tha","ث","حَرْفُ الثَّاء","ثاء","Thâ","Tha"],
+      ["jim","ج","حَرْفُ الجِيم","جيم","Djime","Jim"],
+      ["ha","ح","حَرْفُ الحَاء","حاء","Hâ","Ha"],
+      ["kha","خ","حَرْفُ الخَاء","خاء","Khâ","Kha"],
+      ["dal","د","حَرْفُ الدَّال","دال","Dâl","Dal"],
+      ["dhal","ذ","حَرْفُ الذَّال","ذال","Dhâl","Dhal"],
+      ["ra","ر","حَرْفُ الرَّاء","راء","Râ","Ra"],
+      ["zay","ز","حَرْفُ الزَّاي","زاي","Zây","Zay"],
+      ["sin","س","حَرْفُ السِّين","سين","Sine","Sin"],
+      ["shin","ش","حَرْفُ الشِّين","شين","Chine","Chin"],
+      ["sad","ص","حَرْفُ الصَّاد","صاد","Sâd","Sad"],
+      ["dad","ض","حَرْفُ الضَّاد","ضاد","Dâd","Dad"],
+      ["tah","ط","حَرْفُ الطَّاء","طاء","Tâ","Tâ"],
+      ["zah","ظ","حَرْفُ الظَّاء","ظاء","Zâ","Zâ"],
+      ["ayn","ع","حَرْفُ العَيْن","عين","Aïne","Aïn"],
+      ["ghayn","غ","حَرْفُ الغَيْن","غين","Ghaïne","Ghaïn"],
+      ["fa","ف","حَرْفُ الفَاء","فاء","Fâ","Fa"],
+      ["qaf","ق","حَرْفُ القَاف","قاف","Qâf","Qaf"],
+      ["kaf","ك","حَرْفُ الكَاف","كاف","Kâf","Kaf"],
+      ["lam","ل","حَرْفُ اللَّام","لام","Lâm","Lam"],
+      ["mim","م","حَرْفُ المِيم","ميم","Mime","Mim"],
+      ["noun","ن","حَرْفُ النُّون","نون","Noune","Noun"],
+      ["hah","ه","حَرْفُ الهَاء","هاء","Hâ","Ha"],
+      ["waw","و","حَرْفُ الوَاو","واو","Waou","Waw"],
+      ["ya","ي","حَرْفُ اليَاء","ياء","Yâ","Ya"]
+    ];
+
+    const LATIN = Object.keys(LATIN_SPEECH).map(ch => ({
+      id: "lat_" + ch, glyph: ch, cat: "latin", frSpeech: LATIN_SPEECH[ch],
+      arSpeech: ch, frName: "Lettre " + ch, arName: null
+    }));
+    const NUMBERS = NUM_FR.map((w, i) => ({
+      id: "num_" + i, glyph: String(i), cat: "number", frSpeech: w,
+      arSpeech: w, frName: w[0].toUpperCase() + w.slice(1), arName: null
+    }));
+    const ARABIC = ARABIC_SPECS.map(([id, g, arSp, arNm, frSp, frNm]) => ({
+      id: "ar_" + id, glyph: g, cat: "arabic", frSpeech: frSp,
+      arSpeech: arSp, frName: frNm, arName: arNm
+    }));
+    const ALL_SYMBOLS = [...NUMBERS, ...LATIN, ...ARABIC];
+
+    const PACKS = [
+      { id: "ALL", title: "Tout" },
+      { id: "LATIN", title: "Lettres A-Z" },
+      { id: "NUMBERS", title: "Chiffres 0-10" },
+      { id: "ARABIC", title: "الحروف أ-ي" }
+    ];
+
+    const DIFFS = [
+      { id: "EASY", fr: "Facile", ar: "سهل", minP: 6, maxP: 10 },
+      { id: "MEDIUM", fr: "Moyen", ar: "متوسط", minP: 12, maxP: 18 },
+      { id: "HARD", fr: "Difficile", ar: "صعب", minP: 20, maxP: 26 }
+    ];
+
+    // --- PERSISTED STATE ---
+    const STORE_KEY = "mahjong_abc_ios_v1";
+    let state = Object.assign({
+      music: true, sfx: true, voice: true, speakOnTap: true, dimBlocked: true,
+      arMode: "BILINGUAL",
+      unlocked: { EASY: 1, MEDIUM: 1, HARD: 1 },
+      totalScore: 0, bestStreak: 0,
+      selectedDiff: "EASY", selectedPack: "ALL"
+    }, JSON.parse(localStorage.getItem(STORE_KEY) || "{}"));
+
+    function saveState() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }
+
+    // --- WEB AUDIO CALM MUSIC & SFX + SPEECHSYNTHESIS ---
+    let audioCtx = null;
+    let musicTimer = null;
+    let beatIdx = 0;
+    const MELODY = [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 293.66];
+
+    function unlockAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      syncMusicLoop();
+    }
+
+    function playTone(freq, dur, gainVal, type = "sine") {
+      if (!state.sfx || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(0.001, now);
+      g.gain.linearRampToValueAtTime(gainVal, now + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(g).connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur + 0.02);
+    }
+
+    function playTap() { playTone(600, 0.07, 0.14, "triangle"); }
+    function playBlocked() { playTone(185, 0.09, 0.12, "sine"); }
+    function playMatch() {
+      playTone(523.25, 0.14, 0.16);
+      setTimeout(() => playTone(659.25, 0.24, 0.18), 90);
+    }
+    function playWin() {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+        setTimeout(() => playTone(f, 0.28, 0.16), i * 100);
+      });
+    }
+
+    function syncMusicLoop() {
+      if (state.music && audioCtx && !document.hidden) {
+        if (!musicTimer) {
+          musicTimer = setInterval(() => {
+            if (!state.music || !audioCtx || document.hidden) return;
+            const freq = MELODY[beatIdx % MELODY.length];
+            beatIdx++;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now);
+            g.gain.setValueAtTime(0.001, now);
+            g.gain.linearRampToValueAtTime(0.045, now + 0.04);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+            osc.connect(g).connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.75);
+          }, 800);
+        }
+      } else if (musicTimer) {
+        clearInterval(musicTimer);
+        musicTimer = null;
+      }
+    }
+
+    let speakSeq = 0;
+    function speakSymbol(sym) {
+      if (!state.voice || !("speechSynthesis" in window)) return;
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const mySeq = ++speakSeq;
+      const voices = synth.getVoices();
+      const frVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("fr"));
+      const arVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar") && !v.lang.toLowerCase().includes("eg"))
+        || voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
+
+      function speakFr(text) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "fr-FR";
+        if (frVoice) u.voice = frVoice;
+        u.rate = 0.88;
+        synth.speak(u);
+      }
+
+      if (sym.cat !== "arabic" || state.arMode === "FRENCH") {
+        speakFr(sym.frSpeech);
+        return;
+      }
+
+      if (arVoice) {
+        const uAr = new SpeechSynthesisUtterance(sym.arSpeech);
+        uAr.lang = arVoice.lang || "ar-SA";
+        uAr.voice = arVoice;
+        uAr.rate = 0.80;
+        if (state.arMode === "BILINGUAL") {
+          uAr.onend = () => {
+            if (mySeq === speakSeq) {
+              setTimeout(() => { if (mySeq === speakSeq) speakFr(sym.frSpeech); }, 180);
+            }
+          };
+        }
+        synth.speak(uAr);
+      } else {
+        speakFr(sym.frSpeech);
+      }
+    }
+
+    // --- MAHJONG RULES & GENERATOR ---
+    function seededRandom(seed) {
+      let s = seed % 2147483647;
+      if (s <= 0) s += 2147483646;
+      return () => {
+        s = (s * 16807) % 2147483647;
+        return (s - 1) / 2147483646;
+      };
+    }
+
+    function shuffleArr(arr, rnd) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function isSlotFree(slot, all) {
+      let left = false, right = false;
+      for (const o of all) {
+        if (o === slot || (o.x === slot.x && o.y === slot.y && o.z === slot.z)) continue;
+        if (o.z > slot.z && Math.abs(o.x - slot.x) < 2 && Math.abs(o.y - slot.y) < 2) return false;
+        if (o.z === slot.z && Math.abs(o.y - slot.y) < 2) {
+          if (o.x === slot.x - 2) left = true;
+          if (o.x === slot.x + 2) right = true;
+        }
+      }
+      return !left || !right;
+    }
+
+    function buildSlots(diffId) {
+      const slots = [];
+      if (diffId === "EASY") {
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) slots.push({ x: c*2, y: r*2, z: 0 });
+        slots.push({ x: 1, y: 1, z: 1 }, { x: 5, y: 1, z: 1 }, { x: 1, y: 3, z: 1 }, { x: 5, y: 3, z: 1 });
+      } else if (diffId === "MEDIUM") {
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) slots.push({ x: c*2, y: r*2, z: 0 });
+        for (let r = 1; r < 3; r++) for (let c = 1; c < 4; c++) slots.push({ x: c*2, y: r*2, z: 1 });
+        slots.push({ x: 3, y: 3, z: 2 }, { x: 5, y: 3, z: 2 });
+      } else {
+        for (let r = 0; r < 5; r++) for (let c = 0; c < 6; c++) slots.push({ x: c*2, y: r*2, z: 0 });
+        for (let r = 1; r < 4; r++) for (let c = 1; c < 5; c++) slots.push({ x: c*2, y: r*2, z: 1 });
+        slots.push({ x: 4, y: 3, z: 2 }, { x: 6, y: 3, z: 2 }, { x: 4, y: 5, z: 2 }, { x: 6, y: 5, z: 2 });
+      }
+      return slots;
+    }
+
+    function getPackPool(packId) {
+      if (packId === "LATIN") return LATIN;
+      if (packId === "NUMBERS") return NUMBERS;
+      if (packId === "ARABIC") return ARABIC;
+      return ALL_SYMBOLS;
+    }
+
+    function generateBoard(diffId, packId, seedVal) {
+      const rnd = seededRandom(seedVal);
+      const slots = buildSlots(diffId);
+      const pairCount = slots.length / 2;
+      const pool = getPackPool(packId);
+      const pairs = [];
+      while (pairs.length < pairCount) {
+        for (const s of shuffleArr(pool, rnd)) {
+          if (pairs.length >= pairCount) break;
+          pairs.push(s);
+        }
+      }
+
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const rem = [...slots];
+        const out = [];
+        let ok = true;
+        for (const sym of shuffleArr(pairs, rnd)) {
+          const free = rem.filter(s => isSlotFree(s, rem));
+          if (free.length < 2) { ok = false; break; }
+          const a = free[Math.floor(rnd() * free.length)];
+          const rest = free.filter(s => s !== a);
+          const b = rest[Math.floor(rnd() * rest.length)];
+          out.push({ ...a, sym }, { ...b, sym });
+          rem.splice(rem.indexOf(a), 1);
+          rem.splice(rem.indexOf(b), 1);
+        }
+        if (ok) {
+          return out.map((t, idx) => ({ id: idx + 1, x: t.x, y: t.y, z: t.z, sym: t.sym, free: false }));
+        }
+      }
+      return [];
+    }
+
+    function recomputeFree(tiles) {
+      return tiles.map(t => ({ ...t, free: isSlotFree(t, tiles) }));
+    }
+
+    function findPairs(tiles) {
+      const free = tiles.filter(t => t.free);
+      const res = [];
+      for (let i = 0; i < free.length; i++) {
+        for (let j = i + 1; j < free.length; j++) {
+          if (free[i].sym.id === free[j].sym.id) res.push([free[i], free[j]]);
+        }
+      }
+      return res;
+    }
+
+    // --- GAME SESSION ---
+    let game = {
+      mode: "CAMPAIGN", diff: "EASY", pack: "ALL", level: 1,
+      endlessIdx: 1, streak: 0, score: 0,
+      tiles: [], selectedId: null, hintIds: [], lastSym: null
+    };
+    let screenStack = ["home-screen"];
+    let mapDiff = "EASY";
+    let mapCount = 36;
+
+    function showScreen(id, push = true) {
+      if (push && screenStack[screenStack.length - 1] !== id) screenStack.push(id);
+      document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function goBack() {
+      if (screenStack.length > 1) screenStack.pop();
+      showScreen(screenStack[screenStack.length - 1], false);
+      renderHome();
+    }
+
+    function startBoard(opts) {
+      game = { ...game, ...opts, selectedId: null, hintIds: [], lastSym: null };
+      const seed = game.mode === "CAMPAIGN"
+        ? (DIFFS.findIndex(d => d.id === game.diff) + 1) * 100003 + game.level * 9791
+        : Math.floor(Math.random() * 9999999) + 1;
+      game.tiles = recomputeFree(generateBoard(game.diff, game.pack, seed));
+      document.getElementById("complete-modal").classList.remove("open");
+      showScreen("game-screen");
+      renderGame();
+    }
+
+    function renderHome() {
+      document.getElementById("total-score-pill").textContent = "★ " + state.totalScore + " pts";
+      document.getElementById("home-music-btn").textContent = state.music ? "♪" : "✕";
+      const curLvl = state.unlocked[state.selectedDiff] || 1;
+      document.getElementById("unlocked-badge").textContent = "Niv. " + curLvl + " / ∞";
+      document.getElementById("play-campaign-btn").textContent = "▶ Niveau " + curLvl;
+      document.getElementById("streak-badge").textContent = "Série : " + state.bestStreak;
+
+      const packEl = document.getElementById("pack-chips");
+      packEl.innerHTML = "";
+      PACKS.forEach(p => {
+        const b = document.createElement("button");
+        b.className = "chip" + (state.selectedPack === p.id ? " selected" : "");
+        b.textContent = p.title;
+        b.onclick = () => { unlockAudio(); playTap(); state.selectedPack = p.id; saveState(); renderHome(); };
+        packEl.appendChild(b);
+      });
+
+      const diffEl = document.getElementById("diff-row");
+      diffEl.innerHTML = "";
+      DIFFS.forEach(d => {
+        const b = document.createElement("button");
+        b.className = "diff-btn" + (state.selectedDiff === d.id ? " selected" : "");
+        b.innerHTML = `${d.fr}<small>${d.ar}</small>`;
+        b.onclick = () => { unlockAudio(); playTap(); state.selectedDiff = d.id; saveState(); renderHome(); };
+        diffEl.appendChild(b);
+      });
+    }
+
+    function renderLevelMap() {
+      const dObj = DIFFS.find(d => d.id === mapDiff);
+      document.getElementById("levels-sub").textContent = `${dObj.fr} • ∞ Niveaux`;
+      const row = document.getElementById("map-diff-row");
+      row.innerHTML = "";
+      DIFFS.forEach(d => {
+        const b = document.createElement("button");
+        b.className = "diff-btn" + (mapDiff === d.id ? " selected" : "");
+        b.innerHTML = `${d.fr}<small>${d.ar}</small>`;
+        b.onclick = () => { unlockAudio(); playTap(); mapDiff = d.id; mapCount = Math.max(36, (state.unlocked[mapDiff] || 1) + 12); renderLevelMap(); };
+        row.appendChild(b);
+      });
+
+      const unlocked = state.unlocked[mapDiff] || 1;
+      const grid = document.getElementById("levels-grid");
+      grid.innerHTML = "";
+      for (let i = 1; i <= mapCount; i++) {
+        const node = document.createElement("button");
+        const isDone = i < unlocked;
+        const isCur = i === unlocked;
+        node.className = "lvl-node" + (isCur ? " current" : isDone ? " done" : "");
+        node.innerHTML = `${i}<small style="font-size:11px; margin-top:2px;">${isDone ? "★★★" : isCur ? "▶" : "🔒"}</small>`;
+        node.onclick = () => {
+          if (i <= unlocked) {
+            unlockAudio(); playTap();
+            startBoard({ mode: "CAMPAIGN", diff: mapDiff, pack: state.selectedPack, level: i, score: 0 });
+          }
+        };
+        grid.appendChild(node);
+      }
+    }
+
+    function renderGame() {
+      const pairs = findPairs(game.tiles);
+      document.getElementById("hud-score").textContent = game.score;
+      document.getElementById("hud-pairs").textContent = pairs.length;
+      document.getElementById("tiles-left-pill").textContent = game.tiles.length + " tuiles";
+
+      const dObj = DIFFS.find(d => d.id === game.diff);
+      document.getElementById("mode-pill").textContent = game.mode === "CAMPAIGN"
+        ? `${dObj.fr} • Niveau ${game.level}`
+        : `Sans fin #${game.endlessIdx} • ${dObj.fr}`;
+
+      const pp = document.getElementById("pronounce-pill");
+      if (game.lastSym) {
+        pp.style.display = "inline-block";
+        pp.textContent = game.lastSym.cat === "arabic"
+          ? `🔊 ${game.lastSym.glyph} • ${game.lastSym.arName} / ${game.lastSym.frName}`
+          : `🔊 ${game.lastSym.glyph} • ${game.lastSym.frName}`;
+      } else {
+        pp.style.display = "none";
+      }
+
+      const wrap = document.getElementById("board-wrap");
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      if (game.tiles.length === 0) return;
+
+      const minX = Math.min(...game.tiles.map(t => t.x));
+      const maxX = Math.max(...game.tiles.map(t => t.x));
+      const minY = Math.min(...game.tiles.map(t => t.y));
+      const maxY = Math.max(...game.tiles.map(t => t.y));
+      const maxZ = Math.max(...game.tiles.map(t => t.z));
+
+      const cols = ((maxX - minX) / 2) + 1;
+      const rows = ((maxY - minY) / 2) + 1;
+      const availW = wrap.clientWidth - 20;
+      const availH = wrap.clientHeight - 20;
+
+      const tileW = Math.max(36, Math.min(78, Math.min(availW / (cols + 0.3), availH / (rows * 1.24 + 0.3))));
+      const tileH = tileW * 1.24;
+      const shiftX = 4, shiftY = 5;
+
+      board.style.width = (cols * tileW + maxZ * shiftX + 6) + "px";
+      board.style.height = (rows * tileH + maxZ * shiftY + 8) + "px";
+
+      const sorted = [...game.tiles].sort((a, b) => (a.z - b.z) || (a.y - b.y) || (a.x - b.x));
+      sorted.forEach(tile => {
+        const el = document.createElement("div");
+        const isSel = game.selectedId === tile.id;
+        const isHint = game.hintIds.includes(tile.id);
+        el.className = "tile" + (isSel ? " selected" : "") + (isHint ? " hinted" : "") + (!tile.free && state.dimBlocked ? " blocked" : "");
+        el.style.width = tileW + "px";
+        el.style.height = tileH + "px";
+        el.style.left = (((tile.x - minX) / 2) * tileW + (maxZ - tile.z) * shiftX) + "px";
+        el.style.top = (((tile.y - minY) / 2) * tileH + (maxZ - tile.z) * shiftY) + "px";
+
+        const depth = document.createElement("div");
+        depth.className = "tile-depth";
+        depth.style.transform = `translate(${Math.round(tileW*0.08)}px, ${Math.round(tileH*0.08)}px)`;
+
+        const face = document.createElement("div");
+        face.className = "tile-face";
+        face.textContent = tile.sym.glyph;
+        face.style.fontSize = Math.round(tileW * (tile.sym.glyph.length > 1 ? 0.44 : 0.56)) + "px";
+        face.style.color = tile.sym.cat === "latin" ? "#D63638" : tile.sym.cat === "number" ? "#1958C9" : "#B55309";
+
+        el.appendChild(depth);
+        el.appendChild(face);
+        el.onclick = () => onTileTap(tile, el);
+        board.appendChild(el);
+      });
+    }
+
+    function onTileTap(tile, el) {
+      unlockAudio();
+      if (!tile.free) {
+        playBlocked();
+        el.classList.add("shake");
+        setTimeout(() => el.classList.remove("shake"), 300);
+        return;
+      }
+
+      if (game.selectedId === null) {
+        playTap();
+        game.selectedId = tile.id;
+        game.hintIds = [];
+        game.lastSym = tile.sym;
+        if (state.speakOnTap) speakSymbol(tile.sym);
+        renderGame();
+        return;
+      }
+
+      if (game.selectedId === tile.id) {
+        playTap();
+        if (state.speakOnTap) speakSymbol(tile.sym);
+        game.selectedId = null;
+        renderGame();
+        return;
+      }
+
+      const first = game.tiles.find(t => t.id === game.selectedId);
+      if (first && first.sym.id === tile.sym.id) {
+        game.tiles = recomputeFree(game.tiles.filter(t => t.id !== first.id && t.id !== tile.id));
+        game.selectedId = null;
+        game.hintIds = [];
+        game.lastSym = tile.sym;
+        game.score += 100;
+        playMatch();
+        setTimeout(() => speakSymbol(tile.sym), 130);
+
+        if (game.tiles.length > 0 && findPairs(game.tiles).length === 0) {
+          reshuffleCurrent();
+        }
+        renderGame();
+
+        if (game.tiles.length === 0) {
+          setTimeout(() => {
+            playWin();
+            state.totalScore += game.score;
+            if (game.mode === "CAMPAIGN") {
+              if (game.level >= (state.unlocked[game.diff] || 1)) {
+                state.unlocked[game.diff] = game.level + 1;
+              }
+              document.getElementById("complete-sub").textContent = `Niveau ${game.level} terminé !`;
+              document.getElementById("next-board-btn").textContent = "▶ Niveau suivant";
+            } else {
+              game.streak += 1;
+              if (game.streak > state.bestStreak) state.bestStreak = game.streak;
+              document.getElementById("complete-sub").textContent = `Plateau #${game.endlessIdx} terminé ! Série : ${game.streak}`;
+              document.getElementById("next-board-btn").textContent = "▶ Plateau suivant";
+            }
+            saveState();
+            document.getElementById("complete-score").textContent = "Score : " + game.score;
+            document.getElementById("complete-modal").classList.add("open");
+          }, 550);
+        }
+      } else {
+        playTap();
+        game.selectedId = tile.id;
+        game.hintIds = [];
+        game.lastSym = tile.sym;
+        if (state.speakOnTap) speakSymbol(tile.sym);
+        renderGame();
+      }
+    }
+
+    function reshuffleCurrent() {
+      const syms = shuffleArr(game.tiles.map(t => t.sym), Math.random);
+      game.tiles = recomputeFree(game.tiles.map((t, i) => ({ ...t, sym: syms[i] })));
+      game.selectedId = null;
+      game.hintIds = [];
+    }
+
+    function renderSettings() {
+      document.getElementById("opt-music").checked = state.music;
+      document.getElementById("opt-sfx").checked = state.sfx;
+      document.getElementById("opt-voice").checked = state.voice;
+      document.getElementById("opt-speak-tap").checked = state.speakOnTap;
+      document.getElementById("opt-dim-blocked").checked = state.dimBlocked;
+
+      const radios = document.getElementById("ar-mode-radios");
+      radios.innerHTML = "";
+      [
+        ["BILINGUAL", "العربية + Français"],
+        ["ARABIC", "العربية uniquement"],
+        ["FRENCH", "Français uniquement"]
+      ].forEach(([val, lbl]) => {
+        const label = document.createElement("label");
+        label.style.cssText = "display:flex; align-items:center; gap:10px; font-weight:700;";
+        label.innerHTML = `<input type="radio" name="arMode" value="${val}" ${state.arMode === val ? "checked" : ""}/> ${lbl}`;
+        label.querySelector("input").onchange = () => { state.arMode = val; saveState(); };
+        radios.appendChild(label);
+      });
+    }
+
+    // --- WIRE EVENTS ---
+    document.getElementById("home-music-btn").onclick = () => { unlockAudio(); state.music = !state.music; saveState(); syncMusicLoop(); renderHome(); };
+    document.getElementById("home-settings-btn").onclick = () => { unlockAudio(); playTap(); showScreen("settings-screen"); renderSettings(); };
+    document.getElementById("levels-settings-btn").onclick = () => { unlockAudio(); playTap(); showScreen("settings-screen"); renderSettings(); };
+    document.getElementById("game-settings-btn").onclick = () => { unlockAudio(); playTap(); showScreen("settings-screen"); renderSettings(); };
+
+    document.getElementById("play-campaign-btn").onclick = () => {
+      unlockAudio(); playTap();
+      startBoard({ mode: "CAMPAIGN", diff: state.selectedDiff, pack: state.selectedPack, level: state.unlocked[state.selectedDiff] || 1, score: 0 });
+    };
+    document.getElementById("open-levels-btn").onclick = () => {
+      unlockAudio(); playTap();
+      mapDiff = state.selectedDiff;
+      mapCount = Math.max(36, (state.unlocked[mapDiff] || 1) + 12);
+      showScreen("levels-screen");
+      renderLevelMap();
+    };
+    document.getElementById("play-endless-btn").onclick = () => {
+      unlockAudio(); playTap();
+      startBoard({ mode: "ENDLESS", diff: state.selectedDiff, pack: state.selectedPack, endlessIdx: 1, streak: 0, score: 0 });
+    };
+
+    document.getElementById("levels-back-btn").onclick = goBack;
+    document.getElementById("game-back-btn").onclick = goBack;
+    document.getElementById("settings-back-btn").onclick = goBack;
+    document.getElementById("load-more-levels-btn").onclick = () => { mapCount += 18; renderLevelMap(); };
+
+    document.getElementById("pronounce-pill").onclick = () => { unlockAudio(); if (game.lastSym) speakSymbol(game.lastSym); };
+    document.getElementById("shuffle-btn").onclick = () => { unlockAudio(); playTap(); reshuffleCurrent(); renderGame(); };
+    document.getElementById("hint-btn").onclick = () => {
+      unlockAudio(); playTap();
+      const pairs = findPairs(game.tiles);
+      if (pairs.length) {
+        game.hintIds = [pairs[0][0].id, pairs[0][1].id];
+        game.selectedId = null;
+        renderGame();
+      } else {
+        reshuffleCurrent(); renderGame();
+      }
+    };
+
+    document.getElementById("next-board-btn").onclick = () => {
+      unlockAudio(); playTap();
+      if (game.mode === "CAMPAIGN") {
+        startBoard({ mode: "CAMPAIGN", diff: game.diff, pack: game.pack, level: game.level + 1, score: 0 });
+      } else {
+        startBoard({ mode: "ENDLESS", diff: game.diff, pack: game.pack, endlessIdx: game.endlessIdx + 1, streak: game.streak, score: game.score });
+      }
+    };
+    document.getElementById("replay-btn").onclick = () => {
+      unlockAudio(); playTap();
+      startBoard({ ...game, score: 0 });
+    };
+    document.getElementById("complete-home-btn").onclick = () => {
+      document.getElementById("complete-modal").classList.remove("open");
+      screenStack = ["home-screen"];
+      showScreen("home-screen", false);
+      renderHome();
+    };
+
+    ["opt-music","opt-sfx","opt-voice","opt-speak-tap","opt-dim-blocked"].forEach(id => {
+      document.getElementById(id).onchange = (e) => {
+        if (id === "opt-music") { state.music = e.target.checked; syncMusicLoop(); }
+        if (id === "opt-sfx") state.sfx = e.target.checked;
+        if (id === "opt-voice") state.voice = e.target.checked;
+        if (id === "opt-speak-tap") state.speakOnTap = e.target.checked;
+        if (id === "opt-dim-blocked") state.dimBlocked = e.target.checked;
+        saveState();
+      };
+    });
+
+    document.getElementById("test-fr-btn").onclick = () => { unlockAudio(); playMatch(); setTimeout(() => speakSymbol(NUMBERS[1]), 140); };
+    document.getElementById("test-ar-btn").onclick = () => { unlockAudio(); playMatch(); setTimeout(() => speakSymbol(ARABIC[0]), 140); };
+
+    window.addEventListener("resize", () => { if (screenStack[screenStack.length - 1] === "game-screen") renderGame(); });
+    document.addEventListener("visibilitychange", syncMusicLoop);
+    if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = () => {};
+
+    renderHome();
+  </script>
+</body>
+</html>
